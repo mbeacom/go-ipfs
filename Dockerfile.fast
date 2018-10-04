@@ -31,6 +31,10 @@ RUN set -x \
   && mv cmd/ipfs/ipfs /usr/local/bin/ipfs \
   && mv bin/container_daemon /usr/local/bin/start_ipfs
 
+# Install FUSE
+RUN apt-get update && apt-get install -y fuse
+RUN chmod 4755 /bin/fusermount
+
 # Get su-exec, a very minimal tool for dropping privileges,
 # and tini, a very minimal init daemon for containers
 ENV SUEXEC_VERSION v0.2
@@ -58,6 +62,10 @@ ENV IPFS_PATH /data/ipfs
 RUN mkdir -p $IPFS_PATH \
   && useradd -s /usr/sbin/nologin -d $IPFS_PATH -u 1000 -G users ipfs \
   && chown ipfs:users $IPFS_PATH
+
+# Create mount points for `ipfs mount` command
+RUN mkdir /ipfs /ipns \
+  && chown ipfs:users /ipfs /ipns
 
 # Expose the fs-repo as a volume.
 # start_ipfs initializes an fs-repo if none is mounted.
